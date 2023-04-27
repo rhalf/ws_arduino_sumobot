@@ -1,69 +1,59 @@
-const uint8_t 
-MA_DIR = 11, MA_SPEED = 10, 
-MB_DIR = 8, MB_SPEED = 9;
-uint8_t speed = 128;
+const uint8_t MOTOR_PINS[] = {
+  11,  //motor A direction pin
+  10,  //motor A speed pin
+  8,   //motor B direction pin
+  9    // motor b speed pin
+};
 
-const uint8_t 
-IR_LL = 7, IR_RR = 5, IR_MM = 6;
-boolean onLL = false, onRR = false, onMM = false;
+uint8_t speed = 150;  //128 = 50% (full speed)
 
-void ff() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
+void drive(uint8_t maDir, uint8_t maSpeed, uint8_t mbDir, uint8_t mbSpeed) {
+  digitalWrite(MOTOR_PINS[0], maDir);
+  analogWrite(MOTOR_PINS[1], maSpeed);
+  digitalWrite(MOTOR_PINS[2], mbDir);
+  analogWrite(MOTOR_PINS[3], mbSpeed);
 }
-void bb() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
+void forward() {
+  drive(HIGH, speed, HIGH, speed);
 }
-void ss() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, 0);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, 0);
+void backward() {
+  drive(LOW, speed, LOW, speed);
 }
-void rr() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
+void stop() {
+  drive(LOW, 0, LOW, 0);
 }
-void ll() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
+void right() {
+  drive(HIGH, speed, LOW, speed);
 }
+void left() {
+  drive(LOW, speed , HIGH, speed);
+}
+
+const uint8_t IR_PINS[] = {
+  7,  //ir left pin
+  5,  //ir right pin
+  6   //ir middle pin
+};
+
+bool irsLeft = false, irsRight = false, irsMiddle = false;
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(IR_LL, INPUT);
-  pinMode(IR_RR, INPUT);
-  pinMode(IR_MM, INPUT);
+  pinMode(IR_PINS[0], INPUT);
+  pinMode(IR_PINS[1], INPUT);
+  pinMode(IR_PINS[2], INPUT);
 
-  pinMode(MA_DIR, OUTPUT);
-  pinMode(MA_SPEED, OUTPUT);
-  pinMode(MB_DIR, OUTPUT);
-  pinMode(MB_SPEED, OUTPUT);
-
-  Serial.begin(9600);
+  pinMode(MOTOR_PINS[0], OUTPUT);
+  pinMode(MOTOR_PINS[2], OUTPUT);
 }
 void loop() {
-  // put your main code here, to run repeatedly:
-  if (digitalRead(IR_LL) == HIGH) onLL = true;
-  else onLL = false;
-  if (digitalRead(IR_RR) == HIGH) onRR = true;
-  else onRR = false;
-  if (digitalRead(IR_MM) == HIGH) onMM = true;
-  else onMM = false;
+  irsLeft = digitalRead(IR_PINS[0]);
+  irsRight = digitalRead(IR_PINS[1]);
+  irsMiddle = digitalRead(IR_PINS[2]);
 
-  if (!onLL && onMM && onRR) ll();
-  else if (!onLL && !onMM && onRR) ll();
-  else if (!onLL && onMM && !onRR) ff();
-  else if (onLL && onMM && !onRR) rr();
-  else if (onLL && !onMM && !onRR) rr();
-  else ss();
+  if (!irsLeft && irsMiddle && irsRight) left();
+  else if (!irsLeft && !irsMiddle && irsRight) left();
+  else if (!irsLeft && irsMiddle && !irsRight) forward();
+  else if (irsLeft && irsMiddle && !irsRight) right();
+  else if (irsLeft && !irsMiddle && !irsRight) right();
+  else stop();
 }

@@ -1,34 +1,27 @@
-const uint8_t IR_LEFT = 7, IR_RIGHT = 5, IR_MIDDLE = 6;
-boolean irsLeft = false, irsRight = false, irsMiddle = false;
+const uint8_t IR_PINS[] = {
+  7,  //ir left pin
+  5,  //ir right pin
+  6   //ir middle pin
+};
+
+bool irsLeft = false, irsRight = false, irsMiddle = false;
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(IR_LEFT, INPUT);
-  pinMode(IR_RIGHT, INPUT);
-  pinMode(IR_MIDDLE, INPUT);
+  pinMode(IR_PINS[0], INPUT);
+  pinMode(IR_PINS[1], INPUT);
+  pinMode(IR_PINS[2], INPUT);
   Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if (digitalRead(IR_LEFT) == HIGH) irsLeft = true;
-  else irsLeft = false;
+  irsLeft = digitalRead(IR_PINS[0]);
+  irsRight = digitalRead(IR_PINS[1]);
+  irsMiddle = digitalRead(IR_PINS[2]);
 
-  if (digitalRead(IR_RIGHT) == HIGH) irsRight = true;
-  else irsRight = false;
+  Serial.println(
+    " L: " + String(irsLeft) + 
+    " M:" + String(irsMiddle) + 
+    " R:" String(irsRight));
 
-  if (digitalRead(IR_MIDDLE) == HIGH) irsMiddle = true;
-  else irsMiddle = false;
-
-  Serial.print("Left : ");
-  Serial.print(irsLeft);
-  Serial.print(" ");
-  Serial.print("Middle : ");
-  Serial.print(irsMiddle);
-  Serial.print(" ");
-  Serial.print("Right : ");
-  Serial.print(irsRight);
-  Serial.println();
-  
   delay(250);
 }

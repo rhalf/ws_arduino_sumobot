@@ -1,72 +1,50 @@
-//  ss (stop)
-//  ff (forward)
-//  bb (backward)
-//  rr (right)
-//  ll (left)
-//  Optional
-//  fr (forward right)
-//  fl (forward left)
-//  br (backward right)
-//  bl (backward left)
-const uint8_t 
-  MA_DIR = 11, MA_SPEED = 10, 
-  MB_DIR = 8, MB_SPEED = 9;
-uint8_t speed = 255;
-uint16_t dura = 1000;
+const uint8_t MOTOR_PINS[] = {
+  11,  //motor A direction pin
+  10,  //motor A speed pin
+  8,   //motor B direction pin
+  9    // motor b speed pin
+};
 
-void ff() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
+uint8_t speed = 255; //255 = 100% (full speed)
+uint16_t dura = 1000; // 1000 milliseconds = 1 second
+
+void drive(uint8_t maDir, uint8_t maSpeed, uint8_t mbDir, uint8_t mbSpeed) {
+  digitalWrite(MOTOR_PINS[0], maDir);
+  analogWrite(MOTOR_PINS[1], maSpeed);
+  digitalWrite(MOTOR_PINS[2], mbDir);
+  analogWrite(MOTOR_PINS[3], mbSpeed);
 }
-void bb() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
+void forward() {
+  drive(HIGH, speed, HIGH, speed);
 }
-void ss() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, 0);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, 0);
+void backward() {
+  drive(LOW, speed, LOW, speed);
 }
-void rr() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
+void stop() {
+  drive(LOW, 0, LOW, 0);
 }
-void ll() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
+void right() {
+  drive(HIGH, speed, LOW, speed);
+}
+void left() {
+  drive(LOW, speed, HIGH, speed);
 }
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(MA_DIR, OUTPUT);
-  pinMode(MA_SPEED, OUTPUT);
-  pinMode(MB_DIR, OUTPUT);
-  pinMode(MB_SPEED, OUTPUT);
+  pinMode(MOTOR_PINS[0], OUTPUT);
+  pinMode(MOTOR_PINS[2], OUTPUT);
 
-  Serial.begin(9600);
-  Serial.println("forward");
-  ff();
+  forward();
   delay(dura);
-  Serial.println("backward");
-  bb();
+
+  backward();
   delay(dura);
-  Serial.println("left");
-  ll();
+
+  left();
   delay(dura);
-  Serial.println("right");
-  rr();
+
+  right();
   delay(dura);
-  Serial.println("stop");
-  ss();
+
+  stop();
 }
-void loop() {
-   // put your main code here, to run repeatedly:  
-}
+void loop() {}

@@ -1,5 +1,4 @@
 #include <SoftwareSerial.h>
-
 SoftwareSerial bluetooth(2,3); // RX, TX
 
 void setup () {

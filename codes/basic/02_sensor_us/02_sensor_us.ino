@@ -1,26 +1,28 @@
-const uint8_t US_TRIG = 12, US_ECHO = 3;
-uint64_t time = 0;
+const uint8_t US_PINS[] = {
+  12,  //trigger
+  3    //echo
+};
+uint32_t time = 0;
+
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(US_TRIG, OUTPUT);
-  pinMode(US_ECHO, INPUT);
+  pinMode(US_PINS[0], OUTPUT);
+  pinMode(US_PINS[1], INPUT);
   Serial.begin(9600);
 }
 void loop() {
-  // put your main code here, to run repeatedly:
-  digitalWrite(US_TRIG, LOW);
+  digitalWrite(US_PINS[0], LOW); //making sure the trigger is off.
   delayMicroseconds(2);
-  digitalWrite(US_TRIG, HIGH);
+  digitalWrite(US_PINS[0], HIGH); //create sound
   delayMicroseconds(10);
-  digitalWrite(US_TRIG, LOW);
+  digitalWrite(US_PINS[0], LOW); //turn off
 
-  time =  pulseIn(US_ECHO, HIGH);
+  time = pulseIn(US_PINS[1], HIGH); //count the time of echo.
   // time = microseconds * 1000000
   // 343 m/s speed of sound
-  double dura = (time / 2);
+  float dura = (time / 2);
   dura = dura / 1000000;
   // s = d/t | d = st
-  double dist = 343 * dura;
+  float dist = 343 * dura;
   dist = dist * 100;
   // double dura = (time / 2);
   // double dist = dura / 29.15;

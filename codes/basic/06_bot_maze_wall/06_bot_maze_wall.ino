@@ -1,88 +1,89 @@
-const uint8_t 
-  MA_DIR = 11, MA_SPEED = 10, 
-  MB_DIR = 8, MB_SPEED = 9;
-uint8_t speed = 200;
+const uint8_t MOTOR_PINS[] = {
+  11,  //motor A direction pin
+  10,  //motor A speed pin
+  8,   //motor B direction pin
+  9    // motor b speed pin
+};
 
-const uint8_t US_TRIG = 12, US_ECHO = 3;
-uint16_t dura = 250;
+uint8_t speed = 255;  //255 = 100% (full speed)
+uint16_t dura = 200;  // 1000 milliseconds = 1 second
 
-void ff() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
+void drive(uint8_t maDir, uint8_t maSpeed, uint8_t mbDir, uint8_t mbSpeed) {
+  digitalWrite(MOTOR_PINS[0], maDir);
+  analogWrite(MOTOR_PINS[1], maSpeed);
+  digitalWrite(MOTOR_PINS[2], mbDir);
+  analogWrite(MOTOR_PINS[3], mbSpeed);
 }
-void bb() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
+void forward() {
+  drive(HIGH, speed, HIGH, speed);
 }
-void ss() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, 0);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, 0);
+void backward() {
+  drive(LOW, speed, LOW, speed);
 }
-void rr() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
+void stop() {
+  drive(LOW, 0, LOW, 0);
 }
-void ll() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
+void right() {
+  drive(HIGH, speed, LOW, speed);
 }
+void left() {
+  drive(LOW, speed, HIGH, speed);
+}
+
+const uint8_t US_PINS[] = {
+  12,  //trigger
+  3    //echo
+};
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(MA_DIR, OUTPUT);
-  pinMode(MA_SPEED, OUTPUT);
-  pinMode(MB_DIR, OUTPUT);
-  pinMode(MB_SPEED, OUTPUT);
+  pinMode(MOTOR_PINS[0], OUTPUT);
+  pinMode(MOTOR_PINS[2], OUTPUT);
 
-  pinMode(US_TRIG, OUTPUT);
-  pinMode(US_ECHO, INPUT);
-  Serial.begin(9600);
+  pinMode(US_PINS[0], OUTPUT);
+  pinMode(US_PINS[1], INPUT);
 }
 
-boolean isBlocked() {
-  digitalWrite(US_TRIG, LOW);
+bool isBlocked() {
+  digitalWrite(US_PINS[0], LOW);
   delayMicroseconds(2);
-  digitalWrite(US_TRIG, HIGH);
+  digitalWrite(US_PINS[0], HIGH);
   delayMicroseconds(10);
-  digitalWrite(US_TRIG, LOW);
-  uint64_t time =  pulseIn(US_ECHO, HIGH);
+  digitalWrite(US_PINS[0], LOW);
+
+  uint32_t time = pulseIn(US_PINS[1], HIGH);
   // time = microseconds * 1000000
   // 343 m/s speed of sound
-  double dura = (time / 2);
+  float dura = (time / 2);
   dura = dura / 1000000;
-  double dist = 343 * dura;
+  float dist = 343 * dura;
   dist = dist * 100;
   // cm
   if (dist < 15) return true;
   else return false;
 }
+
 void rightToLeft() {
-  rr();
+  right();
   delay(dura);
-  if (isBlocked())
-    ll(); delay(dura * 2);
+  if (isBlocked()) {
+    left();
+    delay(dura * 2);
+  }
 }
 void leftToRight() {
-  ll(); delay(dura);
-  if (isBlocked())
-    rr(); delay(dura * 2);
+  left();
+  delay(dura);
+  if (isBlocked()) {
+    right();
+    delay(dura * 2);
+  }
 }
 void loop() {
-  // put your main code here, to run repeatedly:
   if (isBlocked()) {
-    uint8_t dir = random(0,2);
-    if (dir) rightToLeft();
+    uint8_t direction = random(0, 2);
+    if (direction) rightToLeft();
     else leftToRight();
-  } else 
-    ff();
+  } else {
+    forward();
+  }
 }

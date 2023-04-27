@@ -4,7 +4,7 @@
    B -> BB (backward)
    R -> RR (right)
    L -> LL (left)
-   tI -> FR (forward right)
+   I -> FR (forward right)
    G -> FL (forward left)
    J -> BR (backward right)
    H -> BL (backward lef)
@@ -21,60 +21,50 @@
    x -> Hazzard Off
 */
 // HC-05_XXX => 1234
-const uint8_t 
-  MA_DIR = 11, MA_SPEED = 10, 
-  MB_DIR = 8, MB_SPEED = 9;
-uint8_t speed = 255;
+const uint8_t MOTOR_PINS[] = {
+  11,  //motor A direction pin
+  10,  //motor A speed pin
+  8,   //motor B direction pin
+  9    // motor b speed pin
+};
 
-void ff() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
-}
-void bb() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
-}
-void ss() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, 0);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, 0);
-}
-void rr() {
-  digitalWrite(MA_DIR, HIGH);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, LOW);
-  analogWrite(MB_SPEED, speed);
-}
-void ll() {
-  digitalWrite(MA_DIR, LOW);
-  analogWrite(MA_SPEED, speed);
-  digitalWrite(MB_DIR, HIGH);
-  analogWrite(MB_SPEED, speed);
-}
+uint8_t speed = 255; //255 = 100% (full speed)
 
+void drive(uint8_t maDir, uint8_t maSpeed, uint8_t mbDir, uint8_t mbSpeed) {
+  digitalWrite(MOTOR_PINS[0], maDir);
+  analogWrite(MOTOR_PINS[1], maSpeed);
+  digitalWrite(MOTOR_PINS[2], mbDir);
+  analogWrite(MOTOR_PINS[3], mbSpeed);
+}
+void forward() {
+  drive(HIGH, speed, HIGH, speed);
+}
+void backward() {
+  drive(LOW, speed, LOW, speed);
+}
+void stop() {
+  drive(LOW, 0, LOW, 0);
+}
+void right() {
+  drive(LOW, speed, HIGH, speed);
+}
+void left() {
+  drive(HIGH, speed, LOW, speed);
+}
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(MA_DIR, OUTPUT);
-  pinMode(MA_SPEED, OUTPUT);
-  pinMode(MB_DIR, OUTPUT);
-  pinMode(MB_SPEED, OUTPUT);
+  pinMode(MOTOR_PINS[0], OUTPUT);
+  pinMode(MOTOR_PINS[2], OUTPUT);
   Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   if (Serial.available()) {
     char c = Serial.read();
-    if (c == 'F') ff();
-    else if (c == 'B') bb();
-    else if (c == 'R') rr();
-    else if (c == 'L') ll();
-    else if (c == 'S') ss();
+    if (c == 'F') forward();
+    else if (c == 'B') backward();
+    else if (c == 'R') right();
+    else if (c == 'L') left();
+    else if (c == 'S') stop();
     else {
       if (!isDigit(c)) return;
       uint8_t v = atoi(c) + 1;
